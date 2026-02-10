@@ -3,68 +3,83 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ERB Consumer Goods Retailing - Auto-Calc Receipt</title>
+    <title>ERB Consumer Goods - Professional Receipt</title>
     <style>
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; display: flex; flex-direction: column; align-items: center; background-color: #f4f4f4; padding: 20px; }
-        .receipt-container { width: 600px; background: white; padding: 40px; border: 1px solid #ccc; box-shadow: 0 0 15px rgba(0,0,0,0.1); position: relative; }
+        .receipt-container { width: 650px; background: white; padding: 40px; border: 1px solid #ccc; box-shadow: 0 0 15px rgba(0,0,0,0.1); position: relative; }
         
-        .header-title { text-align: center; color: #bca37d; font-size: 45px; font-weight: bold; margin-bottom: 0; letter-spacing: 2px; }
-        .header-subtitle { text-align: center; font-style: italic; font-size: 22px; color: #bca37d; margin-top: -5px; margin-bottom: 25px; }
+        .header-title { text-align: center; color: #bca37d; font-size: 45px; font-weight: bold; margin-bottom: 0; letter-spacing: 2px; outline: none; }
+        .header-subtitle { text-align: center; font-style: italic; font-size: 20px; color: #bca37d; margin-top: -5px; margin-bottom: 25px; outline: none; }
         
-        .row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
-        .title-bar { font-weight: bold; font-size: 20px; border-bottom: 2px solid black; }
+        .row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+        .title-bar { font-weight: bold; font-size: 20px; border-bottom: 2px solid black; outline: none; }
         
-        input[type="text"], input[type="number"] { border: none; border-bottom: 1px solid #eee; width: 100%; outline: none; padding: 5px; font-size: 14px; }
-        input[type="number"]::-webkit-inner-spin-button { display: none; } /* Hide arrows */
+        .info-meta { font-size: 14px; text-align: right; line-height: 1.6; }
+        .info-meta input { width: 110px; border-bottom: 1px solid #ccc !important; font-weight: bold; color: #d9534f; }
 
-        .gray-box { background-color: #f2f2f2; padding: 10px; border: 1px solid #000; margin-bottom: 10px; font-weight: bold; }
+        input[type="text"], input[type="number"] { border: none; border-bottom: 1px solid #eee; width: 100%; outline: none; padding: 5px; font-size: 14px; font-family: inherit; }
+        input[type="number"]::-webkit-inner-spin-button { display: none; }
+
+        .gray-box { background-color: #f2f2f2; padding: 12px; border: 1px solid #000; margin-bottom: 10px; font-weight: bold; display: flex; }
         
         table { width: 100%; border-collapse: collapse; margin-top: 10px; }
         table, th, td { border: 1px solid black; }
-        th { font-size: 12px; padding: 8px; background-color: #fff; }
-        td { height: 30px; padding: 0 5px; }
+        th { font-size: 11px; padding: 10px; background-color: #f9f9f9; text-transform: uppercase; }
+        td { height: 35px; padding: 0 5px; }
+        td input { text-align: center; }
 
-        .payment-section { display: grid; grid-template-columns: 1.2fr 1fr; gap: 0; margin-top: 15px; }
-        .payment-box, .total-box { border: 1px solid black; padding: 15px; font-size: 13px; line-height: 1.8; }
+        .payment-section { display: grid; grid-template-columns: 1.3fr 1fr; gap: 0; margin-top: 20px; }
+        .payment-box, .total-box { border: 1px solid black; padding: 12px; font-size: 12px; line-height: 1.6; }
+        
+        .bank-details { margin-top: 10px; padding-top: 8px; border-top: 1px dashed #ccc; font-size: 11px; }
+        .bank-details strong { color: #444; }
+
         .total-box { background-color: #f2f2f2; }
-        .total-box input { background: transparent; text-align: right; width: 100px; float: right; font-weight: bold; }
+        .total-box div { display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; }
+        .total-box input { background: transparent; text-align: right; width: 100px; font-weight: bold; border-bottom: 1px solid #ccc; }
 
-        .signature-area { margin-top: 40px; text-align: center; width: 220px; border-top: 2px solid black; }
-        .contact-info { font-size: 11px; color: #bca37d; text-align: right; margin-top: -70px; }
+        .footer-row { display: flex; justify-content: space-between; align-items: flex-end; margin-top: 40px; }
+        .signature-area { text-align: center; width: 220px; border-top: 2px solid black; padding-top: 5px; }
+        .contact-info { font-size: 11px; color: #bca37d; text-align: right; line-height: 1.4; outline: none; }
 
-        .no-print { margin-bottom: 20px; padding: 12px 25px; background: #bca37d; color: white; border: none; cursor: pointer; border-radius: 5px; font-weight: bold; }
-        .no-print:hover { background: #a68f6a; }
+        .no-print-area { margin-bottom: 20px; }
+        .btn { padding: 12px 25px; border: none; cursor: pointer; border-radius: 5px; font-weight: bold; background: #bca37d; color: white; }
 
         @media print {
-            .no-print { display: none; }
+            .no-print-area { display: none; }
             body { background: white; padding: 0; }
-            .receipt-container { box-shadow: none; border: none; width: 100%; }
+            .receipt-container { box-shadow: none; border: none; width: 100%; padding: 10px; }
+            input::placeholder { color: transparent; }
         }
     </style>
 </head>
-<body>
+<body onload="generateOR()">
 
-    <button class="no-print" onclick="window.print()">🖨️ I-Print ang Resibo</button>
+    <div class="no-print-area">
+        <button class="btn" onclick="window.print()">🖨️ I-Print ang Resibo</button>
+    </div>
 
     <div class="receipt-container">
-        <div class="header-title">ERBCGR</div>
-        <div class="header-subtitle">ERB Consumer Good Retailing</div>
+        <div class="header-title" contenteditable="true">ERBCGR</div>
+        <div class="header-subtitle" contenteditable="true">ERB Consumer Good Retailing</div>
 
         <div class="row">
-            <div class="title-bar">ACKNOWLEDGEMENT RECEIPT</div>
-            <div style="font-size: 14px;">DATE: <input type="text" style="width: 120px;" placeholder="MM/DD/YYYY"></div>
+            <div class="title-bar" contenteditable="true">ACKNOWLEDGEMENT RECEIPT</div>
+            <div class="info-meta">
+                NO: <input type="text" id="orNumber" placeholder="0001"><br>
+                DATE: <input type="text" id="currentDate" placeholder="MM/DD/YYYY">
+            </div>
         </div>
 
         <div class="gray-box">
-            RECEIVED FROM : <input type="text" style="width: 70%; background: transparent;">
+            <span style="white-space: nowrap; margin-right: 10px;">RECEIVED FROM :</span>
+            <input type="text" style="background: transparent; border-bottom: 1px solid #999;">
         </div>
 
-        <div class="row" style="border: 1px solid black; padding: 8px; font-size: 14px; margin-bottom: 5px;">
+        <div class="row" style="border: 1px solid black; padding: 8px; font-size: 13px; margin-bottom: 5px; justify-content: space-around;">
             <label><input type="checkbox"> FULL PAYMENT</label>
             <label><input type="checkbox"> DOWNPAYMENT</label>
         </div>
-
-        <p style="text-align: center; font-size: 12px; margin: 5px 0;">In Settlement of the following :</p>
 
         <table>
             <thead>
@@ -93,55 +108,75 @@
 
         <div class="payment-section">
             <div class="payment-box">
-                <strong>MODE OF PAYMENT</strong><br>
-                <input type="checkbox"> REMITTANCE &nbsp; <input type="checkbox"> BANK<br>
-                <input type="checkbox" checked> GCASH / MAYA &nbsp; <input type="checkbox"> CASH<br>
-                Reference No. : <input type="text" style="width: 120px;" value="8021953351009">
+                <strong>MODE OF PAYMENT:</strong><br>
+                <input type="checkbox"> Remittance &nbsp; <input type="checkbox"> Bank &nbsp; 
+                <input type="checkbox" checked> Gcash &nbsp; <input type="checkbox"> Cash<br>
+                
+                <div class="bank-details">
+                    <strong>ACCOUNT DETAILS:</strong><br>
+                    Name: <span contenteditable="true">Edralene R. Balase</span><br>
+                    GCash: <span contenteditable="true">0961 3016 594</span><br>
+                    BPI: <span contenteditable="true">8039417406</span><br>
+                    Security Bank: <span contenteditable="true">0000024531680</span>
+                </div>
+                
+                <div style="margin-top: 8px;">
+                    Ref No: <input type="text" style="width: 130px; border-bottom: 1px solid #ccc;">
+                </div>
             </div>
+            
             <div class="total-box">
-                Total Sales: <input type="number" id="totalSales" readonly><br>
-                Less: Downpayment: <input type="number" id="downpayment" oninput="calculate()"><br>
-                Less Discounts: <input type="number" id="discounts" oninput="calculate()"><br>
-                <strong>Balance: <input type="number" id="balance" readonly></strong>
+                <div>Total Sales: <input type="number" id="totalSales" readonly></div>
+                <div>Less: Down: <input type="number" id="downpayment" oninput="calculate()"></div>
+                <div>Discounts: <input type="number" id="discounts" oninput="calculate()"></div>
+                <div style="border-top: 2px solid #000; padding-top: 5px; margin-top: 5px;">
+                    <strong>BALANCE:</strong>
+                    <strong><input type="number" id="balance" readonly></strong>
+                </div>
             </div>
         </div>
 
-        <div style="margin-top: 50px;">
+        <div class="footer-row">
             <div class="signature-area">
-                <strong>Edralene Balase</strong><br>
-                <span style="font-size: 11px;">RECEIVED BY</span>
+                <strong contenteditable="true">Edralene R. Balase</strong><br>
+                <span style="font-size: 10px;">AUTHORIZED SIGNATURE</span>
             </div>
-        </div>
-
-        <div class="contact-info">
-            <strong>09613016594</strong> 📞<br>
-            FACEBOOK • TIKTOK ✉️<br>
-            532 9de Febrero St<br>
-          Mandaluyong City 🏠
+            <div class="contact-info" contenteditable="true">
+                <strong>09613016594</strong> 📞<br>
+                FACEBOOK • TIKTOK ✉️<br>
+                532 9de Febrero St, Mandaluyong City 🏠
+            </div>
         </div>
     </div>
 
     <script>
+        // Function para sa Receipt Number at Date
+        function generateOR() {
+            // Random Number (ex. 2024-8392)
+            let randomNo = Math.floor(1000 + Math.random() * 9000);
+            let year = new Date().getFullYear();
+            document.getElementById('orNumber').value = year + "-" + randomNo;
+
+            // Auto-fill Date (MM/DD/YYYY)
+            let today = new Date().toLocaleDateString('en-US');
+            document.getElementById('currentDate').value = today;
+        }
+
         function calculate() {
             let rows = document.querySelectorAll('#receipt-items tr');
             let totalSales = 0;
-
             rows.forEach(row => {
-                let qty = row.querySelector('.qty').value || 0;
-                let price = row.querySelector('.price').value || 0;
+                let qty = parseFloat(row.querySelector('.qty').value) || 0;
+                let price = parseFloat(row.querySelector('.price').value) || 0;
                 let amountField = row.querySelector('.amount');
-                
                 let amount = qty * price;
                 amountField.value = amount > 0 ? amount.toFixed(2) : "";
                 totalSales += amount;
             });
-
             document.getElementById('totalSales').value = totalSales.toFixed(2);
-
-            let downpayment = document.getElementById('downpayment').value || 0;
-            let discounts = document.getElementById('discounts').value || 0;
+            let downpayment = parseFloat(document.getElementById('downpayment').value) || 0;
+            let discounts = parseFloat(document.getElementById('discounts').value) || 0;
             let balance = totalSales - downpayment - discounts;
-
             document.getElementById('balance').value = balance.toFixed(2);
         }
     </script>
