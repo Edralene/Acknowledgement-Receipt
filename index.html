@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ERB Consumer Goods Retailing - Auto-Calc Receipt</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; display: flex; flex-direction: column; align-items: center; background-color: #f4f4f4; padding: 20px; }
+        .receipt-container { width: 600px; background: white; padding: 40px; border: 1px solid #ccc; box-shadow: 0 0 15px rgba(0,0,0,0.1); position: relative; }
+        
+        .header-title { text-align: center; color: #bca37d; font-size: 45px; font-weight: bold; margin-bottom: 0; letter-spacing: 2px; }
+        .header-subtitle { text-align: center; font-style: italic; font-size: 22px; color: #bca37d; margin-top: -5px; margin-bottom: 25px; }
+        
+        .row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+        .title-bar { font-weight: bold; font-size: 20px; border-bottom: 2px solid black; }
+        
+        input[type="text"], input[type="number"] { border: none; border-bottom: 1px solid #eee; width: 100%; outline: none; padding: 5px; font-size: 14px; }
+        input[type="number"]::-webkit-inner-spin-button { display: none; } /* Hide arrows */
+
+        .gray-box { background-color: #f2f2f2; padding: 10px; border: 1px solid #000; margin-bottom: 10px; font-weight: bold; }
+        
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        table, th, td { border: 1px solid black; }
+        th { font-size: 12px; padding: 8px; background-color: #fff; }
+        td { height: 30px; padding: 0 5px; }
+
+        .payment-section { display: grid; grid-template-columns: 1.2fr 1fr; gap: 0; margin-top: 15px; }
+        .payment-box, .total-box { border: 1px solid black; padding: 15px; font-size: 13px; line-height: 1.8; }
+        .total-box { background-color: #f2f2f2; }
+        .total-box input { background: transparent; text-align: right; width: 100px; float: right; font-weight: bold; }
+
+        .signature-area { margin-top: 40px; text-align: center; width: 220px; border-top: 2px solid black; }
+        .contact-info { font-size: 11px; color: #bca37d; text-align: right; margin-top: -70px; }
+
+        .no-print { margin-bottom: 20px; padding: 12px 25px; background: #bca37d; color: white; border: none; cursor: pointer; border-radius: 5px; font-weight: bold; }
+        .no-print:hover { background: #a68f6a; }
+
+        @media print {
+            .no-print { display: none; }
+            body { background: white; padding: 0; }
+            .receipt-container { box-shadow: none; border: none; width: 100%; }
+        }
+    </style>
+</head>
+<body>
+
+    <button class="no-print" onclick="window.print()">🖨️ I-Print ang Resibo</button>
+
+    <div class="receipt-container">
+        <div class="header-title">ERBCGR</div>
+        <div class="header-subtitle">ERB Consumer Good Retailing</div>
+
+        <div class="row">
+            <div class="title-bar">ACKNOWLEDGEMENT RECEIPT</div>
+            <div style="font-size: 14px;">DATE: <input type="text" style="width: 120px;" placeholder="MM/DD/YYYY"></div>
+        </div>
+
+        <div class="gray-box">
+            RECEIVED FROM : <input type="text" style="width: 70%; background: transparent;">
+        </div>
+
+        <div class="row" style="border: 1px solid black; padding: 8px; font-size: 14px; margin-bottom: 5px;">
+            <label><input type="checkbox"> FULL PAYMENT</label>
+            <label><input type="checkbox"> DOWNPAYMENT</label>
+        </div>
+
+        <p style="text-align: center; font-size: 12px; margin: 5px 0;">In Settlement of the following :</p>
+
+        <table>
+            <thead>
+                <tr>
+                    <th style="width: 10%;">QTY.</th>
+                    <th style="width: 50%;">PARTICULARS</th>
+                    <th style="width: 20%;">UNIT PRICE</th>
+                    <th style="width: 20%;">AMOUNT</th>
+                </tr>
+            </thead>
+            <tbody id="receipt-items">
+                <script>
+                    for (let i = 0; i < 8; i++) {
+                        document.write(`
+                            <tr>
+                                <td><input type="number" class="qty" oninput="calculate()"></td>
+                                <td><input type="text"></td>
+                                <td><input type="number" class="price" oninput="calculate()"></td>
+                                <td><input type="number" class="amount" readonly></td>
+                            </tr>
+                        `);
+                    }
+                </script>
+            </tbody>
+        </table>
+
+        <div class="payment-section">
+            <div class="payment-box">
+                <strong>MODE OF PAYMENT</strong><br>
+                <input type="checkbox"> REMITTANCE &nbsp; <input type="checkbox"> BANK<br>
+                <input type="checkbox" checked> GCASH / MAYA &nbsp; <input type="checkbox"> CASH<br>
+                Reference No. : <input type="text" style="width: 120px;" value="8021953351009">
+            </div>
+            <div class="total-box">
+                Total Sales: <input type="number" id="totalSales" readonly><br>
+                Less: Downpayment: <input type="number" id="downpayment" oninput="calculate()"><br>
+                Less Discounts: <input type="number" id="discounts" oninput="calculate()"><br>
+                <strong>Balance: <input type="number" id="balance" readonly></strong>
+            </div>
+        </div>
+
+        <div style="margin-top: 50px;">
+            <div class="signature-area">
+                <strong>Edralene Balase</strong><br>
+                <span style="font-size: 11px;">RECEIVED BY</span>
+            </div>
+        </div>
+
+        <div class="contact-info">
+            <strong>09613016594</strong> 📞<br>
+            FACEBOOK • TIKTOK ✉️<br>
+            532 9de Febrero St<br>
+          Mandaluyong City 🏠
+        </div>
+    </div>
+
+    <script>
+        function calculate() {
+            let rows = document.querySelectorAll('#receipt-items tr');
+            let totalSales = 0;
+
+            rows.forEach(row => {
+                let qty = row.querySelector('.qty').value || 0;
+                let price = row.querySelector('.price').value || 0;
+                let amountField = row.querySelector('.amount');
+                
+                let amount = qty * price;
+                amountField.value = amount > 0 ? amount.toFixed(2) : "";
+                totalSales += amount;
+            });
+
+            document.getElementById('totalSales').value = totalSales.toFixed(2);
+
+            let downpayment = document.getElementById('downpayment').value || 0;
+            let discounts = document.getElementById('discounts').value || 0;
+            let balance = totalSales - downpayment - discounts;
+
+            document.getElementById('balance').value = balance.toFixed(2);
+        }
+    </script>
+
+</body>
+</html>
