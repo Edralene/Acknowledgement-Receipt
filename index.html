@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ERB Consumer Goods - Professional Receipt</title>
     <style>
-        /* General Reset */
         * { box-sizing: border-box; }
         
         body { 
@@ -14,67 +13,88 @@
             flex-direction: column; 
             align-items: center; 
             background-color: #f4f4f4; 
-            padding: 10px; /* Reduced padding for mobile */
+            padding: 10px; 
             margin: 0;
         }
 
         .receipt-container { 
-            width: 98%; /* Fluid width for mobile */
-            max-width: 650px; /* Limit size on desktop */
+            width: 100%;
+            max-width: 650px; 
             background: white; 
-            padding: 20px; /* Adjusted padding */
+            padding: 25px; 
             border: 1px solid #ccc; 
             box-shadow: 0 0 15px rgba(0,0,0,0.1); 
             position: relative; 
-            margin-top: 10px;
         }
         
-        .header-title { text-align: center; color: #bca37d; font-size: clamp(28px, 8vw, 45px); font-weight: bold; margin-bottom: 0; letter-spacing: 2px; outline: none; }
+        .header-title { text-align: center; color: #bca37d; font-size: clamp(30px, 8vw, 45px); font-weight: bold; margin-bottom: 0; letter-spacing: 2px; outline: none; }
         .header-subtitle { text-align: center; font-style: italic; font-size: clamp(14px, 4vw, 20px); color: #bca37d; margin-top: -5px; margin-bottom: 25px; outline: none; }
         
-        .row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; flex-wrap: wrap; }
-        .title-bar { font-weight: bold; font-size: 18px; border-bottom: 2px solid black; outline: none; margin-bottom: 10px; }
-        
-        .info-meta { font-size: 13px; text-align: right; line-height: 1.6; min-width: 150px; }
-        .info-meta input { width: 100px; border-bottom: 1px solid #ccc !important; font-weight: bold; color: #d9534f; }
+        .row { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: flex-end; 
+            margin-bottom: 15px; 
+            gap: 15px;
+            flex-wrap: wrap; /* Para bumaba ang meta info kung sobrang sikip */
+        }
 
-        input[type="text"], input[type="number"] { border: none; border-bottom: 1px solid #eee; width: 100%; outline: none; padding: 5px; font-size: 13px; font-family: inherit; }
+        .title-bar { font-weight: bold; font-size: clamp(16px, 4vw, 20px); border-bottom: 2px solid black; outline: none; flex-shrink: 0; }
+        
+        /* Fixed Alignment for NO. and DATE */
+        .info-meta { 
+            display: grid;
+            grid-template-columns: auto 1fr;
+            gap: 5px 10px;
+            align-items: center;
+            font-size: 13px;
+            min-width: 180px;
+        }
+        .info-meta label { font-weight: bold; }
+        .info-meta input { 
+            width: 100%; 
+            border: none;
+            border-bottom: 1px solid #ccc !important; 
+            font-weight: bold; 
+            color: #d9534f; 
+            background: transparent;
+        }
+
+        input[type="text"], input[type="number"] { border: none; border-bottom: 1px solid #eee; width: 100%; outline: none; padding: 5px; font-size: 14px; font-family: inherit; }
         input[type="number"]::-webkit-inner-spin-button { display: none; }
 
-        .gray-box { background-color: #f2f2f2; padding: 10px; border: 1px solid #000; margin-bottom: 10px; font-weight: bold; display: flex; align-items: center; }
+        .gray-box { background-color: #f2f2f2; padding: 12px; border: 1px solid #000; margin-bottom: 10px; font-weight: bold; display: flex; align-items: center; }
         
-        /* Table responsive scroll for very small screens */
+        /* Table responsive scroll */
         .table-wrapper { width: 100%; overflow-x: auto; }
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; min-width: 400px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; min-width: 450px; }
         table, th, td { border: 1px solid black; }
-        th { font-size: 10px; padding: 8px; background-color: #f9f9f9; text-transform: uppercase; }
+        th { font-size: 11px; padding: 10px; background-color: #f9f9f9; text-transform: uppercase; }
         td { height: 35px; padding: 0 5px; }
         td input { text-align: center; }
 
-        .payment-section { display: grid; grid-template-columns: 1fr; gap: 10px; margin-top: 20px; }
-        
-        /* Desktop layout for payment section */
+        .payment-section { display: grid; grid-template-columns: 1fr; gap: 0; margin-top: 20px; }
         @media (min-width: 600px) {
-            .payment-section { grid-template-columns: 1.3fr 1fr; gap: 0; }
+            .payment-section { grid-template-columns: 1.3fr 1fr; }
         }
 
         .payment-box, .total-box { border: 1px solid black; padding: 12px; font-size: 12px; line-height: 1.6; }
         .bank-details { margin-top: 10px; padding-top: 8px; border-top: 1px dashed #ccc; font-size: 11px; }
         .total-box { background-color: #f2f2f2; }
         .total-box div { display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; }
-        .total-box input { background: transparent; text-align: right; width: 80px; font-weight: bold; border-bottom: 1px solid #ccc; }
+        .total-box input { background: transparent; text-align: right; width: 100px; font-weight: bold; border-bottom: 1px solid #ccc; }
 
-        .footer-row { display: flex; justify-content: space-between; align-items: flex-end; margin-top: 30px; flex-wrap: wrap; gap: 20px; }
-        .signature-area { text-align: center; width: 100%; max-width: 220px; border-top: 2px solid black; padding-top: 5px; }
-        .contact-info { font-size: 11px; color: #bca37d; text-align: left; line-height: 1.4; outline: none; }
+        .footer-row { display: flex; justify-content: space-between; align-items: flex-end; margin-top: 40px; flex-wrap: wrap; gap: 20px; }
+        .signature-area { text-align: center; width: 220px; border-top: 2px solid black; padding-top: 5px; }
+        .contact-info { font-size: 11px; color: #bca37d; text-align: right; line-height: 1.4; outline: none; flex-grow: 1; }
 
-        .no-print-area { margin-bottom: 10px; width: 100%; text-align: center; }
-        .btn { padding: 10px 20px; border: none; cursor: pointer; border-radius: 5px; font-weight: bold; background: #bca37d; color: white; width: 90%; max-width: 300px; }
+        .no-print-area { margin-bottom: 20px; }
+        .btn { padding: 12px 25px; border: none; cursor: pointer; border-radius: 5px; font-weight: bold; background: #bca37d; color: white; }
 
         @media print {
             .no-print-area { display: none; }
             body { background: white; padding: 0; }
-            .receipt-container { box-shadow: none; border: none; width: 100%; padding: 10px; max-width: 100%; }
+            .receipt-container { box-shadow: none; border: none; width: 100%; padding: 10px; }
             input::placeholder { color: transparent; }
         }
     </style>
@@ -92,17 +112,19 @@
         <div class="row">
             <div class="title-bar" contenteditable="true">ACKNOWLEDGEMENT RECEIPT</div>
             <div class="info-meta">
-                NO: <input type="text" id="orNumber" placeholder="0001"><br>
-                DATE: <input type="text" id="currentDate" placeholder="MM/DD/YYYY">
+                <label>NO:</label>
+                <input type="text" id="orNumber">
+                <label>DATE:</label>
+                <input type="text" id="currentDate">
             </div>
         </div>
 
         <div class="gray-box">
-            <span style="white-space: nowrap; margin-right: 10px; font-size: 13px;">RECEIVED FROM :</span>
+            <span style="white-space: nowrap; margin-right: 10px;">RECEIVED FROM :</span>
             <input type="text" style="background: transparent; border-bottom: 1px solid #999;">
         </div>
 
-        <div class="row" style="border: 1px solid black; padding: 8px; font-size: 12px; margin-bottom: 5px; justify-content: space-around;">
+        <div class="row" style="border: 1px solid black; padding: 8px; font-size: 13px; margin-bottom: 5px; justify-content: space-around; flex-wrap: nowrap;">
             <label><input type="checkbox"> FULL PAYMENT</label>
             <label><input type="checkbox"> DOWNPAYMENT</label>
         </div>
@@ -113,7 +135,7 @@
                     <tr>
                         <th style="width: 10%;">QTY.</th>
                         <th style="width: 50%;">PARTICULARS</th>
-                        <th style="width: 20%;">PRICE</th>
+                        <th style="width: 20%;">UNIT PRICE</th>
                         <th style="width: 20%;">AMOUNT</th>
                     </tr>
                 </thead>
@@ -138,10 +160,8 @@
             <div class="payment-box">
                 <strong>MODE OF PAYMENT:</strong><br>
                 <div style="margin: 5px 0;">
-                    <label><input type="checkbox"> Remittance</label> 
-                    <label><input type="checkbox"> Bank</label> 
-                    <label><input type="checkbox" checked> Gcash</label> 
-                    <label><input type="checkbox"> Cash</label>
+                    <input type="checkbox"> Remittance &nbsp; <input type="checkbox"> Bank &nbsp; 
+                    <input type="checkbox" checked> Gcash &nbsp; <input type="checkbox"> Cash
                 </div>
                 
                 <div class="bank-details">
@@ -153,7 +173,7 @@
                 </div>
                 
                 <div style="margin-top: 8px;">
-                    Ref No: <input type="text" style="width: 110px; border-bottom: 1px solid #ccc;">
+                    Ref No: <input type="text" style="width: 130px; border-bottom: 1px solid #ccc;">
                 </div>
             </div>
             
@@ -170,13 +190,13 @@
 
         <div class="footer-row">
             <div class="signature-area">
-                <strong contenteditable="true" style="font-size: 14px;">Edralene R. Balase</strong><br>
+                <strong contenteditable="true">Edralene R. Balase</strong><br>
                 <span style="font-size: 10px;">AUTHORIZED SIGNATURE</span>
             </div>
             <div class="contact-info" contenteditable="true">
                 <strong>09613016594</strong> 📞<br>
                 FACEBOOK • TIKTOK ✉️<br>
-                Mandaluyong City 🏠
+                532 9de Febrero St, Mandaluyong City 🏠
             </div>
         </div>
     </div>
