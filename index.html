@@ -5,50 +5,76 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ERB Consumer Goods - Professional Receipt</title>
     <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; display: flex; flex-direction: column; align-items: center; background-color: #f4f4f4; padding: 20px; }
-        .receipt-container { width: 650px; background: white; padding: 40px; border: 1px solid #ccc; box-shadow: 0 0 15px rgba(0,0,0,0.1); position: relative; }
+        /* General Reset */
+        * { box-sizing: border-box; }
         
-        .header-title { text-align: center; color: #bca37d; font-size: 45px; font-weight: bold; margin-bottom: 0; letter-spacing: 2px; outline: none; }
-        .header-subtitle { text-align: center; font-style: italic; font-size: 20px; color: #bca37d; margin-top: -5px; margin-bottom: 25px; outline: none; }
-        
-        .row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
-        .title-bar { font-weight: bold; font-size: 20px; border-bottom: 2px solid black; outline: none; }
-        
-        .info-meta { font-size: 14px; text-align: right; line-height: 1.6; }
-        .info-meta input { width: 110px; border-bottom: 1px solid #ccc !important; font-weight: bold; color: #d9534f; }
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            background-color: #f4f4f4; 
+            padding: 10px; /* Reduced padding for mobile */
+            margin: 0;
+        }
 
-        input[type="text"], input[type="number"] { border: none; border-bottom: 1px solid #eee; width: 100%; outline: none; padding: 5px; font-size: 14px; font-family: inherit; }
+        .receipt-container { 
+            width: 98%; /* Fluid width for mobile */
+            max-width: 650px; /* Limit size on desktop */
+            background: white; 
+            padding: 20px; /* Adjusted padding */
+            border: 1px solid #ccc; 
+            box-shadow: 0 0 15px rgba(0,0,0,0.1); 
+            position: relative; 
+            margin-top: 10px;
+        }
+        
+        .header-title { text-align: center; color: #bca37d; font-size: clamp(28px, 8vw, 45px); font-weight: bold; margin-bottom: 0; letter-spacing: 2px; outline: none; }
+        .header-subtitle { text-align: center; font-style: italic; font-size: clamp(14px, 4vw, 20px); color: #bca37d; margin-top: -5px; margin-bottom: 25px; outline: none; }
+        
+        .row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; flex-wrap: wrap; }
+        .title-bar { font-weight: bold; font-size: 18px; border-bottom: 2px solid black; outline: none; margin-bottom: 10px; }
+        
+        .info-meta { font-size: 13px; text-align: right; line-height: 1.6; min-width: 150px; }
+        .info-meta input { width: 100px; border-bottom: 1px solid #ccc !important; font-weight: bold; color: #d9534f; }
+
+        input[type="text"], input[type="number"] { border: none; border-bottom: 1px solid #eee; width: 100%; outline: none; padding: 5px; font-size: 13px; font-family: inherit; }
         input[type="number"]::-webkit-inner-spin-button { display: none; }
 
-        .gray-box { background-color: #f2f2f2; padding: 12px; border: 1px solid #000; margin-bottom: 10px; font-weight: bold; display: flex; }
+        .gray-box { background-color: #f2f2f2; padding: 10px; border: 1px solid #000; margin-bottom: 10px; font-weight: bold; display: flex; align-items: center; }
         
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        /* Table responsive scroll for very small screens */
+        .table-wrapper { width: 100%; overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; min-width: 400px; }
         table, th, td { border: 1px solid black; }
-        th { font-size: 11px; padding: 10px; background-color: #f9f9f9; text-transform: uppercase; }
+        th { font-size: 10px; padding: 8px; background-color: #f9f9f9; text-transform: uppercase; }
         td { height: 35px; padding: 0 5px; }
         td input { text-align: center; }
 
-        .payment-section { display: grid; grid-template-columns: 1.3fr 1fr; gap: 0; margin-top: 20px; }
-        .payment-box, .total-box { border: 1px solid black; padding: 12px; font-size: 12px; line-height: 1.6; }
+        .payment-section { display: grid; grid-template-columns: 1fr; gap: 10px; margin-top: 20px; }
         
-        .bank-details { margin-top: 10px; padding-top: 8px; border-top: 1px dashed #ccc; font-size: 11px; }
-        .bank-details strong { color: #444; }
+        /* Desktop layout for payment section */
+        @media (min-width: 600px) {
+            .payment-section { grid-template-columns: 1.3fr 1fr; gap: 0; }
+        }
 
+        .payment-box, .total-box { border: 1px solid black; padding: 12px; font-size: 12px; line-height: 1.6; }
+        .bank-details { margin-top: 10px; padding-top: 8px; border-top: 1px dashed #ccc; font-size: 11px; }
         .total-box { background-color: #f2f2f2; }
         .total-box div { display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; }
-        .total-box input { background: transparent; text-align: right; width: 100px; font-weight: bold; border-bottom: 1px solid #ccc; }
+        .total-box input { background: transparent; text-align: right; width: 80px; font-weight: bold; border-bottom: 1px solid #ccc; }
 
-        .footer-row { display: flex; justify-content: space-between; align-items: flex-end; margin-top: 40px; }
-        .signature-area { text-align: center; width: 220px; border-top: 2px solid black; padding-top: 5px; }
-        .contact-info { font-size: 11px; color: #bca37d; text-align: right; line-height: 1.4; outline: none; }
+        .footer-row { display: flex; justify-content: space-between; align-items: flex-end; margin-top: 30px; flex-wrap: wrap; gap: 20px; }
+        .signature-area { text-align: center; width: 100%; max-width: 220px; border-top: 2px solid black; padding-top: 5px; }
+        .contact-info { font-size: 11px; color: #bca37d; text-align: left; line-height: 1.4; outline: none; }
 
-        .no-print-area { margin-bottom: 20px; }
-        .btn { padding: 12px 25px; border: none; cursor: pointer; border-radius: 5px; font-weight: bold; background: #bca37d; color: white; }
+        .no-print-area { margin-bottom: 10px; width: 100%; text-align: center; }
+        .btn { padding: 10px 20px; border: none; cursor: pointer; border-radius: 5px; font-weight: bold; background: #bca37d; color: white; width: 90%; max-width: 300px; }
 
         @media print {
             .no-print-area { display: none; }
             body { background: white; padding: 0; }
-            .receipt-container { box-shadow: none; border: none; width: 100%; padding: 10px; }
+            .receipt-container { box-shadow: none; border: none; width: 100%; padding: 10px; max-width: 100%; }
             input::placeholder { color: transparent; }
         }
     </style>
@@ -72,45 +98,51 @@
         </div>
 
         <div class="gray-box">
-            <span style="white-space: nowrap; margin-right: 10px;">RECEIVED FROM :</span>
+            <span style="white-space: nowrap; margin-right: 10px; font-size: 13px;">RECEIVED FROM :</span>
             <input type="text" style="background: transparent; border-bottom: 1px solid #999;">
         </div>
 
-        <div class="row" style="border: 1px solid black; padding: 8px; font-size: 13px; margin-bottom: 5px; justify-content: space-around;">
+        <div class="row" style="border: 1px solid black; padding: 8px; font-size: 12px; margin-bottom: 5px; justify-content: space-around;">
             <label><input type="checkbox"> FULL PAYMENT</label>
             <label><input type="checkbox"> DOWNPAYMENT</label>
         </div>
 
-        <table>
-            <thead>
-                <tr>
-                    <th style="width: 10%;">QTY.</th>
-                    <th style="width: 50%;">PARTICULARS</th>
-                    <th style="width: 20%;">UNIT PRICE</th>
-                    <th style="width: 20%;">AMOUNT</th>
-                </tr>
-            </thead>
-            <tbody id="receipt-items">
-                <script>
-                    for (let i = 0; i < 8; i++) {
-                        document.write(`
-                            <tr>
-                                <td><input type="number" class="qty" oninput="calculate()"></td>
-                                <td><input type="text"></td>
-                                <td><input type="number" class="price" oninput="calculate()"></td>
-                                <td><input type="number" class="amount" readonly></td>
-                            </tr>
-                        `);
-                    }
-                </script>
-            </tbody>
-        </table>
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                    <tr>
+                        <th style="width: 10%;">QTY.</th>
+                        <th style="width: 50%;">PARTICULARS</th>
+                        <th style="width: 20%;">PRICE</th>
+                        <th style="width: 20%;">AMOUNT</th>
+                    </tr>
+                </thead>
+                <tbody id="receipt-items">
+                    <script>
+                        for (let i = 0; i < 8; i++) {
+                            document.write(`
+                                <tr>
+                                    <td><input type="number" class="qty" oninput="calculate()"></td>
+                                    <td><input type="text"></td>
+                                    <td><input type="number" class="price" oninput="calculate()"></td>
+                                    <td><input type="number" class="amount" readonly></td>
+                                </tr>
+                            `);
+                        }
+                    </script>
+                </tbody>
+            </table>
+        </div>
 
         <div class="payment-section">
             <div class="payment-box">
                 <strong>MODE OF PAYMENT:</strong><br>
-                <input type="checkbox"> Remittance &nbsp; <input type="checkbox"> Bank &nbsp; 
-                <input type="checkbox" checked> Gcash &nbsp; <input type="checkbox"> Cash<br>
+                <div style="margin: 5px 0;">
+                    <label><input type="checkbox"> Remittance</label> 
+                    <label><input type="checkbox"> Bank</label> 
+                    <label><input type="checkbox" checked> Gcash</label> 
+                    <label><input type="checkbox"> Cash</label>
+                </div>
                 
                 <div class="bank-details">
                     <strong>ACCOUNT DETAILS:</strong><br>
@@ -121,7 +153,7 @@
                 </div>
                 
                 <div style="margin-top: 8px;">
-                    Ref No: <input type="text" style="width: 130px; border-bottom: 1px solid #ccc;">
+                    Ref No: <input type="text" style="width: 110px; border-bottom: 1px solid #ccc;">
                 </div>
             </div>
             
@@ -138,26 +170,22 @@
 
         <div class="footer-row">
             <div class="signature-area">
-                <strong contenteditable="true">Edralene R. Balase</strong><br>
+                <strong contenteditable="true" style="font-size: 14px;">Edralene R. Balase</strong><br>
                 <span style="font-size: 10px;">AUTHORIZED SIGNATURE</span>
             </div>
             <div class="contact-info" contenteditable="true">
                 <strong>09613016594</strong> 📞<br>
                 FACEBOOK • TIKTOK ✉️<br>
-                532 9de Febrero St, Mandaluyong City 🏠
+                Mandaluyong City 🏠
             </div>
         </div>
     </div>
 
     <script>
-        // Function para sa Receipt Number at Date
         function generateOR() {
-            // Random Number (ex. 2024-8392)
             let randomNo = Math.floor(1000 + Math.random() * 9000);
             let year = new Date().getFullYear();
             document.getElementById('orNumber').value = year + "-" + randomNo;
-
-            // Auto-fill Date (MM/DD/YYYY)
             let today = new Date().toLocaleDateString('en-US');
             document.getElementById('currentDate').value = today;
         }
