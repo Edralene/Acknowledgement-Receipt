@@ -93,6 +93,7 @@
         .no-print-area { margin-bottom: 20px; text-align: center; display: flex; flex-direction: column; align-items: center; gap: 8px; }
         .btn { padding: 12px 18px; border: none; cursor: pointer; border-radius: 8px; font-weight: bold; background: #bca37d; color: white; width: min(100%, 260px); touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
         .mobile-action-bar { display: none; }
+        .desktop-action-panel { margin-bottom: 20px; text-align: center; display: flex; flex-direction: column; align-items: center; gap: 8px; }
         .secondary-btn { background: #5f6f65; }
         .light-btn { background: white; color: #5f6f65; border: 1px solid #cfcfcf; }
         .save-status { font-size: 12px; color: #666; max-width: 320px; line-height: 1.4; }
@@ -148,34 +149,44 @@
             .signature-area { width: 170px; font-size: 12px; }
             .contact-info { width: 100%; text-align: left; font-size: 10px; }
 
+            .desktop-action-panel { display: none; }
+
             .mobile-action-bar {
-                display: grid;
+                display: grid !important;
                 grid-template-columns: 1fr 1fr;
                 gap: 8px;
-                position: fixed;
-                left: 8px;
-                right: 8px;
-                bottom: 8px;
-                z-index: 999;
+                position: fixed !important;
+                left: 10px;
+                right: 10px;
+                top: 10px;
+                bottom: auto;
+                z-index: 2147483647 !important;
+                pointer-events: auto !important;
                 padding: 8px;
                 border-radius: 16px;
-                background: rgba(255,255,255,.97);
+                background: rgba(255,255,255,.98);
                 border: 1px solid #d5d5d5;
-                box-shadow: 0 12px 30px rgba(0,0,0,.20);
+                box-shadow: 0 12px 30px rgba(0,0,0,.24);
+                -webkit-transform: translateZ(0);
+                transform: translateZ(0);
             }
             .mobile-action-bar .btn {
                 width: 100%;
                 min-height: 46px;
                 padding: 10px 8px;
                 font-size: 12px;
+                pointer-events: auto !important;
             }
             .mobile-action-bar .btn:first-child {
                 grid-column: 1 / -1;
             }
+
+            /* Gives space below the fixed action dock so the receipt never sits under it. */
+            .receipt-container { margin-top: 126px; }
         }
 
         @media print {
-            .no-print-area, .mobile-action-bar { display: none !important; }
+            .no-print-area, .mobile-action-bar, .desktop-action-panel { display: none !important; }
             body { background: white; padding: 0; }
             .receipt-container { box-shadow: none; border: none; width: 100%; max-width: none; padding: 10px; overflow: visible; }
             input::placeholder { color: transparent; }
@@ -184,20 +195,20 @@
 </head>
 <body onload="initReceipt()">
 
-    <div class="no-print-area">
-        <button class="btn" onclick="window.print()">🖨️ Print / Save PDF</button>
-        <button class="btn secondary-btn" onclick="saveCurrentReceiptNumber()">💾 Save Receipt No.</button>
-        <button class="btn secondary-btn" onclick="createNewReceipt()">＋ New Receipt</button>
-        <button class="btn secondary-btn" onclick="saveBusinessProfile()">💾 Save Business Details</button>
-        <button class="btn light-btn" onclick="resetBusinessProfile()">↺ Reset Saved Details</button>
+    <div class="desktop-action-panel no-print-area">
+        <button type="button" class="btn" onclick="printReceiptSafe()">🖨️ Print / Save PDF</button>
+        <button type="button" class="btn secondary-btn" onclick="saveCurrentReceiptNumber()">💾 Save Receipt No.</button>
+        <button type="button" class="btn secondary-btn" onclick="createNewReceipt()">＋ New Receipt</button>
+        <button type="button" class="btn secondary-btn" onclick="saveBusinessProfile()">💾 Save Business Details</button>
+        <button type="button" class="btn light-btn" onclick="resetBusinessProfile()">↺ Reset Saved Details</button>
         <div id="saveStatus" class="save-status">Auto-saves business name and account details on this device.</div>
         <div id="receiptStatus" class="save-status">Receipt number is generated sequentially on this device.</div>
     </div>
 
-    <div class="mobile-action-bar no-print-area">
-        <button class="btn" onclick="window.print()">🖨️ Print / Save PDF</button>
-        <button class="btn secondary-btn" onclick="saveCurrentReceiptNumber()">💾 Save No.</button>
-        <button class="btn secondary-btn" onclick="createNewReceipt()">＋ New</button>
+    <div class="mobile-action-bar" id="mobileActionBar">
+        <button type="button" class="btn" onclick="printReceiptSafe()">🖨️ Print / Save PDF</button>
+        <button type="button" class="btn secondary-btn" onclick="saveCurrentReceiptNumber()">💾 Save No.</button>
+        <button type="button" class="btn secondary-btn" onclick="createNewReceipt()">＋ New</button>
     </div>
 
     <div class="receipt-container">
@@ -374,6 +385,18 @@
 
             currentReceiptMarkedUsed = true;
             showReceiptStatus(`Saved: ${number || currentReceiptNumber}. You can now create a new receipt.`);
+        }
+
+        function printReceiptSafe() {
+            // Keep printing separate from receipt-number saving.
+            showReceiptStatus("Opening print options...");
+
+            try {
+                window.focus();
+                window.print();
+            } catch (error) {
+                showReceiptStatus("This in-app browser blocked printing. Tap ⋯ then choose Open in Browser.");
+            }
         }
 
         function createNewReceipt() {
