@@ -86,8 +86,15 @@
         .total-box div { display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; }
         .total-box input { background: transparent; text-align: right; width: 100px; font-weight: bold; border-bottom: 1px solid #ccc; }
 
-        .footer-row { display: flex; justify-content: space-between; align-items: flex-end; margin-top: 40px; flex-wrap: wrap; gap: 20px; }
-        .signature-area { text-align: center; width: 220px; border-top: 2px solid black; padding-top: 5px; }
+        .footer-row { display: flex; justify-content: space-between; align-items: flex-end; margin-top: 26px; flex-wrap: wrap; gap: 20px; }
+        .online-receipt-note {
+            max-width: 320px;
+            padding: 8px 0;
+            color: #666;
+            font-size: 10px;
+            font-style: italic;
+            line-height: 1.4;
+        }
         .contact-info { font-size: 11px; color: #bca37d; text-align: right; line-height: 1.4; outline: none; flex-grow: 1; }
 
         .no-print-area { margin-bottom: 20px; text-align: center; display: flex; flex-direction: column; align-items: center; gap: 8px; }
@@ -255,9 +262,10 @@
             flex-wrap: nowrap !important;
             align-items: flex-end !important;
         }
-        .receipt-container.export-image .signature-area {
-            width: 220px !important;
-            font-size: 12px !important;
+        .receipt-container.export-image .online-receipt-note {
+            max-width: 390px !important;
+            padding: 4px 0 !important;
+            font-size: 10px !important;
         }
         .receipt-container.export-image .contact-info {
             flex: 1 !important;
@@ -359,8 +367,8 @@
             .payment-box, .total-box { padding: 9px; font-size: 11px; }
             .total-box input { width: 85px; font-size: 16px !important; }
 
-            .footer-row { margin-top: 26px; gap: 14px; }
-            .signature-area { width: 170px; font-size: 12px; }
+            .footer-row { margin-top: 18px; gap: 8px; }
+            .online-receipt-note { width: 100%; max-width: none; font-size: 10px; }
             .contact-info { width: 100%; text-align: left; font-size: 10px; }
 
             .desktop-action-panel { display: none; }
@@ -529,9 +537,8 @@
         </div>
 
         <div class="footer-row">
-            <div class="signature-area">
-                <strong class="saved-field" id="authorizedSignature" contenteditable="true">Edralene R. Balase</strong><br>
-                <span style="font-size: 10px;">AUTHORIZED SIGNATURE</span>
+            <div class="online-receipt-note">
+                This is an online-generated receipt. No signature is required.
             </div>
             <div class="contact-info saved-field" id="contactInfo" contenteditable="true">
                 <strong>09613016594</strong> 📞<br>
@@ -552,7 +559,6 @@
             "accountGcash",
             "accountBpi",
             "accountSecurityBank",
-            "authorizedSignature",
             "contactInfo"
         ];
 
