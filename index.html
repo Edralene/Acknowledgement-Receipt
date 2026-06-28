@@ -43,7 +43,7 @@
 
         .title-bar { font-weight: bold; font-size: clamp(16px, 4vw, 20px); border-bottom: 2px solid black; outline: none; flex-shrink: 0; }
         
-        /* Fixed Alignment for NO. and DATE */
+        /* Fixed Alignment for NO. && DATE */
         .info-meta { 
             display: grid;
             grid-template-columns: auto 1fr;
@@ -149,7 +149,7 @@
         }
         .image-preview-actions .btn { width: 100%; }
 
-        /* Off-screen export layout: shorter and wider when saving as image */
+        /* Off-screen export layout: shorter && wider when saving as image */
         .export-capture-host {
             position: fixed;
             left: -10000px;
@@ -266,6 +266,47 @@
             font-size: 10px !important;
             line-height: 1.35 !important;
         }
+        .receipt-container.export-image .export-static-field {
+            display: inline-block;
+            width: 100%;
+            min-height: 18px;
+            padding: 2px 4px 1px !important;
+            line-height: 1.25 !important;
+            color: #111;
+            background: transparent;
+            vertical-align: middle;
+            overflow: visible;
+        }
+        .receipt-container.export-image .export-static-line {
+            border-bottom: 1px solid #ccc;
+        }
+        .receipt-container.export-image .export-static-meta {
+            color: #d9534f;
+            font-weight: bold;
+            text-align: left;
+        }
+        .receipt-container.export-image .export-static-table {
+            text-align: center;
+            min-height: 22px;
+            padding-top: 4px !important;
+        }
+        .receipt-container.export-image .export-static-right {
+            text-align: right;
+            font-weight: bold;
+        }
+        .receipt-container.export-image .export-static-checkbox {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 16px;
+            min-width: 16px;
+            height: 16px;
+            margin-right: 5px;
+            border: 1px solid #888;
+            border-radius: 3px;
+            font-size: 11px;
+            line-height: 1;
+        }
 
         .secondary-btn { background: #5f6f65; }
         .light-btn { background: white; color: #5f6f65; border: 1px solid #cfcfcf; }
@@ -379,7 +420,7 @@
         <button type="button" class="btn secondary-btn" onclick="createNewReceipt()">＋ New Receipt</button>
         <button type="button" class="btn secondary-btn" onclick="saveBusinessProfile()">💾 Save Business Details</button>
         <button type="button" class="btn light-btn" onclick="resetBusinessProfile()">↺ Reset Saved Details</button>
-        <div id="saveStatus" class="save-status">Auto-saves business name and account details on this device.</div>
+        <div id="saveStatus" class="save-status">Auto-saves business name && account details on this device.</div>
         <div id="receiptStatus" class="save-status">Receipt number is generated sequentially on this device.</div>
     </div>
 
@@ -600,6 +641,50 @@
             });
         }
 
+        function createStaticField(value, className = "") {
+            const span = document.createElement("span");
+            span.className = `export-static-field ${className}`.trim();
+            span.textContent = value || "";
+            return span;
+        }
+
+        function flattenCloneForImage(source, clone) {
+            const sourceFields = source.querySelectorAll("input, textarea, select");
+            const cloneFields = clone.querySelectorAll("input, textarea, select");
+
+            sourceFields.forEach((field, index) => {
+                const twin = cloneFields[index];
+                if (!twin || !twin.parentNode) return;
+
+                const value = field.type === "checkbox" || field.type === "radio" ? "" : (field.value || "");
+                let replacement;
+
+                if (field.type === "checkbox" || field.type === "radio") {
+                    replacement = document.createElement("span");
+                    replacement.className = "export-static-checkbox";
+                    replacement.textContent = field.checked ? "✓" : "";
+                    twin.parentNode.replaceChild(replacement, twin);
+                    return;
+                }
+
+                if (twin.closest(".info-meta")) {
+                    replacement = createStaticField(value, "export-static-line export-static-meta");
+                } else if (twin.closest("td")) {
+                    replacement = createStaticField(value, "export-static-table");
+                } else if (twin.closest(".total-box")) {
+                    replacement = createStaticField(value, "export-static-line export-static-right");
+                } else if (twin.closest(".gray-box") || (twin.closest(".payment-box") && twin.closest(".payment-box").textContent.includes("Ref No"))) {
+                    replacement = createStaticField(value, "export-static-line");
+                } else if (twin.closest(".payment-box")) {
+                    replacement = createStaticField(value, "export-static-line");
+                } else {
+                    replacement = createStaticField(value, "export-static-line");
+                }
+
+                twin.parentNode.replaceChild(replacement, twin);
+            });
+        }
+
         async function saveReceiptImage() {
             const receipt = document.querySelector(".receipt-container");
 
@@ -622,6 +707,7 @@
                 exportClone.classList.add("export-image");
 
                 syncReceiptFieldsToClone(receipt, exportClone);
+                flattenCloneForImage(receipt, exportClone);
 
                 host = document.createElement("div");
                 host.className = "export-capture-host";
@@ -793,7 +879,7 @@
         }
 
         function resetBusinessProfile() {
-            const confirmReset = confirm("Reset saved business name and account details on this device?");
+            const confirmReset = confirm("Reset saved business name && account details on this device?");
 
             if (!confirmReset) return;
 
@@ -809,7 +895,7 @@
 
             clearTimeout(window.profileSaveTimer);
             window.profileSaveTimer = setTimeout(() => {
-                status.textContent = "Auto-saves business name and account details on this device.";
+                status.textContent = "Auto-saves business name && account details on this device.";
             }, 2500);
         }
 
