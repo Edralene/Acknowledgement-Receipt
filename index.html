@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>ERB Consumer Goods - Professional Receipt</title>
     <style>
         * { box-sizing: border-box; }
@@ -78,18 +78,29 @@
             .payment-section { grid-template-columns: 1.3fr 1fr; }
         }
 
-        .payment-box, .total-box { border: 1px solid black; padding: 12px; font-size: 12px; line-height: 1.6; }
+        .payment-box, .TOTAL-box { border: 1px solid black; padding: 12px; font-size: 12px; line-height: 1.6; }
         .bank-details { margin-top: 10px; padding-top: 8px; border-top: 1px dashed #ccc; font-size: 11px; }
-        .total-box { background-color: #f2f2f2; }
-        .total-box div { display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; }
-        .total-box input { background: transparent; text-align: right; width: 100px; font-weight: bold; border-bottom: 1px solid #ccc; }
+        .TOTAL-box { background-color: #f2f2f2; }
+        .TOTAL-box div { display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; }
+        .TOTAL-box input { background: transparent; text-align: right; width: 100px; font-weight: bold; border-bottom: 1px solid #ccc; }
 
         .footer-row { display: flex; justify-content: space-between; align-items: flex-end; margin-top: 40px; flex-wrap: wrap; gap: 20px; }
         .signature-area { text-align: center; width: 220px; border-top: 2px solid black; padding-top: 5px; }
         .contact-info { font-size: 11px; color: #bca37d; text-align: right; line-height: 1.4; outline: none; flex-grow: 1; }
 
-        .no-print-area { margin-bottom: 20px; }
-        .btn { padding: 12px 25px; border: none; cursor: pointer; border-radius: 5px; font-weight: bold; background: #bca37d; color: white; }
+        .no-print-area { margin-bottom: 20px; text-align: center; display: flex; flex-direction: column; align-items: center; gap: 8px; }
+        .btn { padding: 12px 18px; border: none; cursor: pointer; border-radius: 8px; font-weight: bold; background: #bca37d; color: white; width: min(100%, 260px); }
+        .secondary-btn { background: #5f6f65; }
+        .light-btn { background: white; color: #5f6f65; border: 1px solid #cfcfcf; }
+        .save-status { font-size: 12px; color: #666; max-width: 320px; line-height: 1.4; }
+        .saved-field { border-radius: 4px; padding: 1px 3px; }
+        .saved-field:focus { background: #fff8e8; outline: 1px dashed #bca37d; }
+
+        @media (max-width: 600px) {
+            input, textarea, select, [contenteditable="true"] { font-size: 16px !important; }
+            .receipt-container { padding: 16px; }
+            .row[style*="flex-wrap: nowrap"] { flex-wrap: wrap !important; justify-content: flex-start !important; }
+        }
 
         @media print {
             .no-print-area { display: none; }
@@ -99,15 +110,18 @@
         }
     </style>
 </head>
-<body onload="generateOR()">
+<body onload="initReceipt()">
 
     <div class="no-print-area">
         <button class="btn" onclick="window.print()">🖨️ I-Print ang Resibo</button>
+        <button class="btn secondary-btn" onclick="saveBusinessProfile()">💾 Save Details</button>
+        <button class="btn light-btn" onclick="resetBusinessProfile()">↺ Reset Saved Details</button>
+        <div id="saveStatus" class="save-status">Auto-saves business name and account details on this device.</div>
     </div>
 
     <div class="receipt-container">
-        <div class="header-title" contenteditable="true">Edss Create</div>
-        <div class="header-subtitle" contenteditable="true">ERB Consumer Good Retailing</div>
+        <div class="header-title saved-field" id="businessName" contenteditable="true">Edss Create</div>
+        <div class="header-subtitle saved-field" id="businessSubtitle" contenteditable="true">ERB Consumer Good Retailing</div>
 
         <div class="row">
             <div class="title-bar" contenteditable="true">ACKNOWLEDGEMENT RECEIPT</div>
@@ -166,10 +180,10 @@
                 
                 <div class="bank-details">
                     <strong>ACCOUNT DETAILS:</strong><br>
-                    Name: <span contenteditable="true">Edralene R. Balase</span><br>
-                    GCash: <span contenteditable="true">0961 3016 594</span><br>
-                    BPI: <span contenteditable="true">8039417406</span><br>
-                    Security Bank: <span contenteditable="true">0000024531680</span>
+                    Name: <span class="saved-field" id="accountName" contenteditable="true">Edralene R. Balase</span><br>
+                    GCash: <span class="saved-field" id="accountGcash" contenteditable="true">0961 3016 594</span><br>
+                    BPI: <span class="saved-field" id="accountBpi" contenteditable="true">8039417406</span><br>
+                    Security Bank: <span class="saved-field" id="accountSecurityBank" contenteditable="true">0000024531680</span>
                 </div>
                 
                 <div style="margin-top: 8px;">
@@ -177,23 +191,23 @@
                 </div>
             </div>
             
-            <div class="total-box">
-                <div>Total Sales: <input type="number" id="totalSales" readonly></div>
+            <div class="TOTAL-box">
+                <div>Sales: <input type="number" id="TOTALSales" readonly></div>
                 <div>Less: Down: <input type="number" id="downpayment" oninput="calculate()"></div>
                 <div>Discounts: <input type="number" id="discounts" oninput="calculate()"></div>
                 <div style="border-top: 2px solid #000; padding-top: 5px; margin-top: 5px;">
-                    <strong>BALANCE:</strong>
-                    <strong><input type="number" id="balance" readonly></strong>
+                    <strong>TOTAL:</strong>
+                    <strong><input type="number" id="TOTAL" readonly></strong>
                 </div>
             </div>
         </div>
 
         <div class="footer-row">
             <div class="signature-area">
-                <strong contenteditable="true">Edralene R. Balase</strong><br>
+                <strong class="saved-field" id="authorizedSignature" contenteditable="true">Edralene R. Balase</strong><br>
                 <span style="font-size: 10px;">AUTHORIZED SIGNATURE</span>
             </div>
-            <div class="contact-info" contenteditable="true">
+            <div class="contact-info saved-field" id="contactInfo" contenteditable="true">
                 <strong>09613016594</strong> 📞<br>
                 FACEBOOK • TIKTOK ✉️<br>
                 532 9de Febrero St, Mandaluyong City 🏠
@@ -202,6 +216,26 @@
     </div>
 
     <script>
+        const PROFILE_KEY = "acknowledgementReceiptBusinessProfile_v1";
+
+        const profileFields = [
+            "businessName",
+            "businessSubtitle",
+            "accountName",
+            "accountGcash",
+            "accountBpi",
+            "accountSecurityBank",
+            "authorizedSignature",
+            "contactInfo"
+        ];
+
+        function initReceipt() {
+            generateOR();
+            loadBusinessProfile();
+            setupAutoSave();
+            calculate();
+        }
+
         function generateOR() {
             let randomNo = Math.floor(1000 + Math.random() * 9000);
             let year = new Date().getFullYear();
@@ -210,22 +244,96 @@
             document.getElementById('currentDate').value = today;
         }
 
+        function getBusinessProfile() {
+            try {
+                return JSON.parse(localStorage.getItem(PROFILE_KEY)) || {};
+            } catch (error) {
+                return {};
+            }
+        }
+
+        function loadBusinessProfile() {
+            const saved = getBusinessProfile();
+
+            profileFields.forEach(id => {
+                const element = document.getElementById(id);
+                if (element && saved[id]) {
+                    element.innerHTML = saved[id];
+                }
+            });
+        }
+
+        function saveBusinessProfile(showMessage = true) {
+            const profile = {};
+
+            profileFields.forEach(id => {
+                const element = document.getElementById(id);
+                if (element) {
+                    profile[id] = element.innerHTML.trim();
+                }
+            });
+
+            localStorage.setItem(PROFILE_KEY, JSON.stringify(profile));
+
+            if (showMessage) {
+                showSaveStatus("Saved! Hindi mo na kailangan ulitin i-type sa device na ito.");
+            }
+        }
+
+        function setupAutoSave() {
+            profileFields.forEach(id => {
+                const element = document.getElementById(id);
+
+                if (!element) return;
+
+                element.addEventListener("input", () => {
+                    saveBusinessProfile(false);
+                    showSaveStatus("Auto-saved on this device.");
+                });
+
+                element.addEventListener("blur", () => {
+                    saveBusinessProfile(false);
+                });
+            });
+        }
+
+        function resetBusinessProfile() {
+            const confirmReset = confirm("Reset saved business name and account details on this device?");
+
+            if (!confirmReset) return;
+
+            localStorage.removeItem(PROFILE_KEY);
+            location.reload();
+        }
+
+        function showSaveStatus(message) {
+            const status = document.getElementById("saveStatus");
+            if (!status) return;
+
+            status.textContent = message;
+
+            clearTimeout(window.profileSaveTimer);
+            window.profileSaveTimer = setTimeout(() => {
+                status.textContent = "Auto-saves business name and account details on this device.";
+            }, 2500);
+        }
+
         function calculate() {
             let rows = document.querySelectorAll('#receipt-items tr');
-            let totalSales = 0;
+            let TOTALSales = 0;
             rows.forEach(row => {
                 let qty = parseFloat(row.querySelector('.qty').value) || 0;
                 let price = parseFloat(row.querySelector('.price').value) || 0;
                 let amountField = row.querySelector('.amount');
                 let amount = qty * price;
                 amountField.value = amount > 0 ? amount.toFixed(2) : "";
-                totalSales += amount;
+                TOTALSales += amount;
             });
-            document.getElementById('totalSales').value = totalSales.toFixed(2);
+            document.getElementById('TOTALSales').value = TOTALSales.toFixed(2);
             let downpayment = parseFloat(document.getElementById('downpayment').value) || 0;
             let discounts = parseFloat(document.getElementById('discounts').value) || 0;
-            let balance = totalSales - downpayment - discounts;
-            document.getElementById('balance').value = balance.toFixed(2);
+            let TOTAL = TOTALSales - downpayment - discounts;
+            document.getElementById('TOTAL').value = TOTAL.toFixed(2);
         }
     </script>
 
