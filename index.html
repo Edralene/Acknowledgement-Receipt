@@ -169,6 +169,9 @@
                 padding: 10px 8px;
                 font-size: 12px;
             }
+            .mobile-action-bar .btn:first-child {
+                grid-column: 1 / -1;
+            }
         }
 
         @media print {
@@ -182,17 +185,19 @@
 <body onload="initReceipt()">
 
     <div class="no-print-area">
-        <button class="btn" onclick="printReceipt()">🖨️ Mark as Used & Print</button>
+        <button class="btn" onclick="window.print()">🖨️ Print / Save PDF</button>
+        <button class="btn secondary-btn" onclick="saveCurrentReceiptNumber()">💾 Save Receipt No.</button>
         <button class="btn secondary-btn" onclick="createNewReceipt()">＋ New Receipt</button>
-        <button class="btn secondary-btn" onclick="saveBusinessProfile()">💾 Save Details</button>
+        <button class="btn secondary-btn" onclick="saveBusinessProfile()">💾 Save Business Details</button>
         <button class="btn light-btn" onclick="resetBusinessProfile()">↺ Reset Saved Details</button>
         <div id="saveStatus" class="save-status">Auto-saves business name and account details on this device.</div>
         <div id="receiptStatus" class="save-status">Receipt number is generated sequentially on this device.</div>
     </div>
 
     <div class="mobile-action-bar no-print-area">
-        <button class="btn" onclick="printReceipt()">🖨️ Print / Save PDF</button>
-        <button class="btn secondary-btn" onclick="createNewReceipt()">＋ New Receipt</button>
+        <button class="btn" onclick="window.print()">🖨️ Print / Save PDF</button>
+        <button class="btn secondary-btn" onclick="saveCurrentReceiptNumber()">💾 Save No.</button>
+        <button class="btn secondary-btn" onclick="createNewReceipt()">＋ New</button>
     </div>
 
     <div class="receipt-container">
@@ -350,15 +355,16 @@
             showReceiptStatus(`Ready: Receipt No. ${currentReceiptNumber}`);
         }
 
-        function markReceiptAsUsed() {
+        function saveCurrentReceiptNumber() {
             if (currentReceiptMarkedUsed) {
+                showReceiptStatus(`Already saved: ${currentReceiptNumber}`);
                 return;
             }
 
             const numberInput = document.getElementById('orNumber');
             const number = numberInput.value.trim();
 
-            // Only advances the automatic sequence for its generated receipt number.
+            // Only advances the automatic sequence when the current generated number is saved.
             if (number === currentReceiptNumber) {
                 const next = getNextReceiptNumber();
                 const saved = getReceiptCounter();
@@ -367,36 +373,13 @@
             }
 
             currentReceiptMarkedUsed = true;
-            showReceiptStatus(`Marked as used: ${number || currentReceiptNumber}`);
-        }
-
-        function printReceipt() {
-            markReceiptAsUsed();
-
-            // Direct call is important for mobile browser gesture permissions.
-            try {
-                window.focus();
-                window.print();
-            } catch (error) {
-                showReceiptStatus("Print is blocked in this in-app browser. Tap ⋯ then choose Open in Browser.");
-            }
-
-            // Messenger/Facebook in-app browsers sometimes ignore window.print().
-            setTimeout(() => {
-                showReceiptStatus("If the print sheet did not open, tap ⋯ then choose Open in Browser, then tap Print / Save PDF again.");
-            }, 900);
+            showReceiptStatus(`Saved: ${number || currentReceiptNumber}. You can now create a new receipt.`);
         }
 
         function createNewReceipt() {
-            const hasAnyEntry = [...document.querySelectorAll('#receipt-items input, #downpayment, #discounts')]
-                .some(field => String(field.value || "").trim() !== "");
-
-            if (hasAnyEntry && !currentReceiptMarkedUsed) {
-                const proceed = confirm(
-                    "Create a new receipt? The current receipt number will be marked as used so it will not repeat."
-                );
-                if (!proceed) return;
-                markReceiptAsUsed();
+            if (!currentReceiptMarkedUsed) {
+                alert("Please tap “Save Receipt No.” first before creating a new receipt.");
+                return;
             }
 
             clearReceiptForm();
