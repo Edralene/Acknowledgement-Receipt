@@ -80,8 +80,17 @@
             .payment-section { grid-template-columns: 1.3fr 1fr; }
         }
 
-        .payment-box, .total-box { border: 1px solid black; padding: 12px; font-size: 12px; line-height: 1.6; }
-        .bank-details { margin-top: 10px; padding-top: 8px; border-top: 1px dashed #ccc; font-size: 11px; }
+        .payment-box, .total-box { border: 1px solid black; padding: 12px; font-size: 11px; line-height: 1.55; }
+        .payment-box > strong,
+        .bank-details > strong,
+        .total-box strong { font-size: 11px; font-weight: 700; letter-spacing: 0; }
+        .payment-box input[type="checkbox"] { transform: scale(.9); vertical-align: middle; }
+        .payment-box .saved-field,
+        .payment-box span,
+        .payment-box input[type="text"] { font-size: 11px; font-weight: 400; }
+        .bank-details { margin-top: 8px; padding-top: 8px; border-top: 1px dashed #ccc; font-size: 11px; line-height: 1.55; }
+        .bank-details .saved-field,
+        .bank-details span { font-size: 11px !important; font-weight: 400 !important; }
         .total-box { background-color: #f2f2f2; }
         .total-box div { display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; }
         .total-box input { background: transparent; text-align: right; width: 100px; font-weight: bold; border-bottom: 1px solid #ccc; }
@@ -244,13 +253,33 @@
         .receipt-container.export-image .payment-box,
         .receipt-container.export-image .total-box {
             padding: 10px !important;
-            font-size: 11px !important;
+            font-size: 10px !important;
+            line-height: 1.45 !important;
+        }
+        .receipt-container.export-image .payment-box > strong,
+        .receipt-container.export-image .bank-details > strong,
+        .receipt-container.export-image .total-box strong {
+            font-size: 10px !important;
+            font-weight: 700 !important;
+        }
+        .receipt-container.export-image .payment-box .saved-field,
+        .receipt-container.export-image .payment-box span,
+        .receipt-container.export-image .payment-box input[type="text"],
+        .receipt-container.export-image .payment-box .export-static-field {
+            font-size: 10px !important;
+            font-weight: 400 !important;
         }
         .receipt-container.export-image .bank-details {
             margin-top: 8px !important;
             padding-top: 6px !important;
             font-size: 10px !important;
-            line-height: 1.55 !important;
+            line-height: 1.5 !important;
+        }
+        .receipt-container.export-image .bank-details .saved-field,
+        .receipt-container.export-image .bank-details span,
+        .receipt-container.export-image .bank-details .export-static-field {
+            font-size: 10px !important;
+            font-weight: 400 !important;
         }
         .receipt-container.export-image .total-box input {
             width: 86px !important;
@@ -364,7 +393,13 @@
             td input { padding: 3px 1px; min-width: 0; font-size: 16px !important; }
 
             .payment-section { margin-top: 13px; }
-            .payment-box, .total-box { padding: 9px; font-size: 11px; }
+            .payment-box, .total-box { padding: 9px; font-size: 10px; line-height: 1.45; }
+            .payment-box > strong,
+            .bank-details > strong,
+            .total-box strong { font-size: 10px; }
+            .bank-details,
+            .bank-details .saved-field,
+            .bank-details span { font-size: 10px !important; }
             .total-box input { width: 85px; font-size: 16px !important; }
 
             .footer-row { margin-top: 18px; gap: 8px; }
