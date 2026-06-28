@@ -148,6 +148,125 @@
             margin-top: 12px;
         }
         .image-preview-actions .btn { width: 100%; }
+
+        /* Off-screen export layout: shorter and wider when saving as image */
+        .export-capture-host {
+            position: fixed;
+            left: -10000px;
+            top: 0;
+            width: 1000px;
+            pointer-events: none;
+            opacity: 0;
+            z-index: -1;
+        }
+        .receipt-container.export-image {
+            width: 980px !important;
+            max-width: none !important;
+            padding: 18px 18px 14px !important;
+            border: 1px solid #bbb;
+            box-shadow: none !important;
+            overflow: visible !important;
+            margin: 0 !important;
+        }
+        .receipt-container.export-image .header-title {
+            font-size: 40px !important;
+            letter-spacing: 1px !important;
+            line-height: 1.05;
+        }
+        .receipt-container.export-image .header-subtitle {
+            font-size: 16px !important;
+            margin-top: -2px !important;
+            margin-bottom: 16px !important;
+        }
+        .receipt-container.export-image .row {
+            margin-bottom: 11px !important;
+            gap: 14px !important;
+            flex-wrap: nowrap !important;
+            align-items: flex-end !important;
+        }
+        .receipt-container.export-image .title-bar {
+            font-size: 18px !important;
+            width: auto !important;
+        }
+        .receipt-container.export-image .info-meta {
+            min-width: 270px !important;
+            width: 270px !important;
+            font-size: 12px !important;
+            gap: 4px 8px !important;
+        }
+        .receipt-container.export-image .gray-box {
+            padding: 10px !important;
+            margin-bottom: 8px !important;
+            font-size: 13px !important;
+        }
+        .receipt-container.export-image .row[style*="justify-content: space-around"] {
+            margin-bottom: 8px !important;
+            padding: 7px 10px !important;
+            font-size: 11px !important;
+            justify-content: flex-start !important;
+            gap: 26px !important;
+        }
+        .receipt-container.export-image .table-wrapper {
+            overflow: visible !important;
+        }
+        .receipt-container.export-image table {
+            min-width: 0 !important;
+            table-layout: fixed !important;
+            margin-top: 7px !important;
+        }
+        .receipt-container.export-image th {
+            font-size: 9px !important;
+            padding: 6px 3px !important;
+            line-height: 1.1 !important;
+        }
+        .receipt-container.export-image td {
+            height: 28px !important;
+            padding: 0 3px !important;
+        }
+        .receipt-container.export-image td input,
+        .receipt-container.export-image input[type="text"],
+        .receipt-container.export-image input[type="number"] {
+            font-size: 12px !important;
+            padding: 2px 3px !important;
+        }
+        .receipt-container.export-image .payment-section {
+            grid-template-columns: 1.25fr .95fr !important;
+            gap: 0 !important;
+            margin-top: 12px !important;
+        }
+        .receipt-container.export-image .payment-box,
+        .receipt-container.export-image .total-box {
+            padding: 10px !important;
+            font-size: 11px !important;
+        }
+        .receipt-container.export-image .bank-details {
+            margin-top: 8px !important;
+            padding-top: 6px !important;
+            font-size: 10px !important;
+            line-height: 1.55 !important;
+        }
+        .receipt-container.export-image .total-box input {
+            width: 86px !important;
+            font-size: 12px !important;
+        }
+        .receipt-container.export-image .footer-row {
+            margin-top: 18px !important;
+            gap: 14px !important;
+            flex-wrap: nowrap !important;
+            align-items: flex-end !important;
+        }
+        .receipt-container.export-image .signature-area {
+            width: 220px !important;
+            font-size: 12px !important;
+        }
+        .receipt-container.export-image .contact-info {
+            flex: 1 !important;
+            width: auto !important;
+            text-align: right !important;
+            font-size: 10px !important;
+            line-height: 1.35 !important;
+        }
+
         .secondary-btn { background: #5f6f65; }
         .light-btn { background: white; color: #5f6f65; border: 1px solid #cfcfcf; }
         .save-status { font-size: 12px; color: #666; max-width: 320px; line-height: 1.4; }
@@ -276,7 +395,7 @@
                 <strong>Receipt image ready</strong>
                 <button type="button" class="preview-close" onclick="closeImagePreview()" aria-label="Close">×</button>
             </div>
-            <p>Tap <b>Share / Save Image</b>. Sa iPhone, piliin ang <b>Save Image</b> sa share sheet. Kung walang lumabas, long press the image then choose Save to Photos.</p>
+            <p>Tap <b>Share / Save Image</b>. Ginagawa na nitong mas compact at mas maikli ang receipt para mas maayos kapag sine-save. Sa iPhone, piliin ang <b>Save Image</b> sa share sheet. Kung walang lumabas, long press the image then choose Save to Photos.</p>
             <img id="receiptImagePreview" alt="Generated acknowledgement receipt">
             <div class="image-preview-actions">
                 <button type="button" class="btn" onclick="shareGeneratedImage()">↗ Share / Save Image</button>
@@ -464,9 +583,21 @@
         let generatedReceiptBlob = null;
         let generatedReceiptUrl = "";
 
-        function hideActionPanelsForCapture(hide = true) {
-            document.querySelectorAll(".no-print-area, .mobile-action-bar, .desktop-action-panel")
-                .forEach(el => el.style.visibility = hide ? "hidden" : "");
+        function syncReceiptFieldsToClone(source, clone) {
+            const sourceFields = source.querySelectorAll("input, textarea, select");
+            const cloneFields = clone.querySelectorAll("input, textarea, select");
+
+            sourceFields.forEach((field, index) => {
+                const twin = cloneFields[index];
+                if (!twin) return;
+
+                if (field.type === "checkbox" || field.type === "radio") {
+                    twin.checked = field.checked;
+                } else {
+                    twin.value = field.value;
+                    twin.setAttribute("value", field.value);
+                }
+            });
         }
 
         async function saveReceiptImage() {
@@ -482,21 +613,32 @@
                 return;
             }
 
-            showReceiptStatus("Creating receipt image...");
-            hideActionPanelsForCapture(true);
+            showReceiptStatus("Creating compact receipt image...");
+
+            let host = null;
 
             try {
-                // Let the browser finish hiding the action dock before capturing.
-                await new Promise(resolve => setTimeout(resolve, 80));
+                const exportClone = receipt.cloneNode(true);
+                exportClone.classList.add("export-image");
 
-                const canvas = await html2canvas(receipt, {
+                syncReceiptFieldsToClone(receipt, exportClone);
+
+                host = document.createElement("div");
+                host.className = "export-capture-host";
+                host.appendChild(exportClone);
+                document.body.appendChild(host);
+
+                await new Promise(resolve => setTimeout(resolve, 60));
+
+                const canvas = await html2canvas(exportClone, {
                     backgroundColor: "#ffffff",
                     scale: 2,
                     useCORS: true,
                     logging: false,
+                    width: exportClone.scrollWidth,
+                    windowWidth: exportClone.scrollWidth,
                     scrollX: 0,
-                    scrollY: -window.scrollY,
-                    windowWidth: document.documentElement.clientWidth
+                    scrollY: 0
                 });
 
                 const blob = await new Promise(resolve => canvas.toBlob(resolve, "image/png", 1));
@@ -511,11 +653,11 @@
                 document.getElementById("imagePreviewOverlay").classList.add("show");
                 document.getElementById("imagePreviewOverlay").setAttribute("aria-hidden", "false");
 
-                showReceiptStatus("Receipt image ready. Tap Share / Save Image.");
+                showReceiptStatus("Compact receipt image ready. Tap Share / Save Image.");
             } catch (error) {
                 showReceiptStatus("Could not create image. Open the page in Safari/Chrome, then try again.");
             } finally {
-                hideActionPanelsForCapture(false);
+                if (host && host.parentNode) host.parentNode.removeChild(host);
             }
         }
 
