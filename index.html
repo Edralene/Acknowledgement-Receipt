@@ -13,8 +13,9 @@
             flex-direction: column; 
             align-items: center; 
             background-color: #f4f4f4; 
-            padding: 10px; 
+            padding: 10px 10px 92px; 
             margin: 0;
+            overflow-x: hidden;
         }
 
         .receipt-container { 
@@ -25,6 +26,7 @@
             border: 1px solid #ccc; 
             box-shadow: 0 0 15px rgba(0,0,0,0.1); 
             position: relative; 
+            overflow: hidden;
         }
         
         .header-title { text-align: center; color: #bca37d; font-size: clamp(30px, 8vw, 45px); font-weight: bold; margin-bottom: 0; letter-spacing: 2px; outline: none; }
@@ -78,18 +80,19 @@
             .payment-section { grid-template-columns: 1.3fr 1fr; }
         }
 
-        .payment-box, .TOTAL-box { border: 1px solid black; padding: 12px; font-size: 12px; line-height: 1.6; }
+        .payment-box, .total-box { border: 1px solid black; padding: 12px; font-size: 12px; line-height: 1.6; }
         .bank-details { margin-top: 10px; padding-top: 8px; border-top: 1px dashed #ccc; font-size: 11px; }
-        .TOTAL-box { background-color: #f2f2f2; }
-        .TOTAL-box div { display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; }
-        .TOTAL-box input { background: transparent; text-align: right; width: 100px; font-weight: bold; border-bottom: 1px solid #ccc; }
+        .total-box { background-color: #f2f2f2; }
+        .total-box div { display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; }
+        .total-box input { background: transparent; text-align: right; width: 100px; font-weight: bold; border-bottom: 1px solid #ccc; }
 
         .footer-row { display: flex; justify-content: space-between; align-items: flex-end; margin-top: 40px; flex-wrap: wrap; gap: 20px; }
         .signature-area { text-align: center; width: 220px; border-top: 2px solid black; padding-top: 5px; }
         .contact-info { font-size: 11px; color: #bca37d; text-align: right; line-height: 1.4; outline: none; flex-grow: 1; }
 
         .no-print-area { margin-bottom: 20px; text-align: center; display: flex; flex-direction: column; align-items: center; gap: 8px; }
-        .btn { padding: 12px 18px; border: none; cursor: pointer; border-radius: 8px; font-weight: bold; background: #bca37d; color: white; width: min(100%, 260px); }
+        .btn { padding: 12px 18px; border: none; cursor: pointer; border-radius: 8px; font-weight: bold; background: #bca37d; color: white; width: min(100%, 260px); touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
+        .mobile-action-bar { display: none; }
         .secondary-btn { background: #5f6f65; }
         .light-btn { background: white; color: #5f6f65; border: 1px solid #cfcfcf; }
         .save-status { font-size: 12px; color: #666; max-width: 320px; line-height: 1.4; }
@@ -97,15 +100,81 @@
         .saved-field:focus { background: #fff8e8; outline: 1px dashed #bca37d; }
 
         @media (max-width: 600px) {
+            body { padding: 6px 6px 82px; }
             input, textarea, select, [contenteditable="true"] { font-size: 16px !important; }
-            .receipt-container { padding: 16px; }
-            .row[style*="flex-wrap: nowrap"] { flex-wrap: wrap !important; justify-content: flex-start !important; }
+
+            .no-print-area { display: none; }
+
+            .receipt-container { 
+                width: 100%;
+                max-width: 100%;
+                padding: 14px 10px;
+                border: 1px solid #bbb;
+                box-shadow: none;
+            }
+
+            .header-title { font-size: 30px; letter-spacing: 1px; }
+            .header-subtitle { font-size: 15px; margin-bottom: 18px; }
+            .title-bar { font-size: 17px; width: 100%; }
+            .row { gap: 9px; margin-bottom: 11px; }
+            .info-meta { width: 100%; min-width: 0; grid-template-columns: 50px minmax(0,1fr); font-size: 13px; }
+            .gray-box { padding: 10px; font-size: 13px; }
+            .row[style*="flex-wrap: nowrap"] { flex-wrap: wrap !important; justify-content: flex-start !important; gap: 10px 16px !important; }
+
+            .table-wrapper { overflow: visible; }
+            table { 
+                width: 100%; 
+                min-width: 0; 
+                table-layout: fixed; 
+                margin-top: 8px;
+            }
+            th { 
+                font-size: 8px; 
+                padding: 7px 2px; 
+                word-break: break-word;
+                line-height: 1.15;
+            }
+            td { height: 32px; padding: 0 2px; }
+            th:nth-child(1) { width: 12%; }
+            th:nth-child(2) { width: 49%; }
+            th:nth-child(3), th:nth-child(4) { width: 19.5%; }
+            td input { padding: 3px 1px; min-width: 0; font-size: 16px !important; }
+
+            .payment-section { margin-top: 13px; }
+            .payment-box, .total-box { padding: 9px; font-size: 11px; }
+            .total-box input { width: 85px; font-size: 16px !important; }
+
+            .footer-row { margin-top: 26px; gap: 14px; }
+            .signature-area { width: 170px; font-size: 12px; }
+            .contact-info { width: 100%; text-align: left; font-size: 10px; }
+
+            .mobile-action-bar {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 8px;
+                position: fixed;
+                left: 8px;
+                right: 8px;
+                bottom: 8px;
+                z-index: 999;
+                padding: 8px;
+                border-radius: 16px;
+                background: rgba(255,255,255,.97);
+                border: 1px solid #d5d5d5;
+                box-shadow: 0 12px 30px rgba(0,0,0,.20);
+            }
+            .mobile-action-bar .btn {
+                width: 100%;
+                min-height: 46px;
+                padding: 10px 8px;
+                font-size: 12px;
+            }
         }
 
         @media print {
-            .no-print-area { display: none; }
+            .no-print-area, .mobile-action-bar { display: none !important; }
             body { background: white; padding: 0; }
-            .receipt-container { box-shadow: none; border: none; width: 100%; padding: 10px; }
+            .receipt-container { box-shadow: none; border: none; width: 100%; max-width: none; padding: 10px; overflow: visible; }
             input::placeholder { color: transparent; }
         }
     </style>
@@ -113,10 +182,17 @@
 <body onload="initReceipt()">
 
     <div class="no-print-area">
-        <button class="btn" onclick="window.print()">🖨️ I-Print ang Resibo</button>
+        <button class="btn" onclick="printReceipt()">🖨️ Mark as Used & Print</button>
+        <button class="btn secondary-btn" onclick="createNewReceipt()">＋ New Receipt</button>
         <button class="btn secondary-btn" onclick="saveBusinessProfile()">💾 Save Details</button>
         <button class="btn light-btn" onclick="resetBusinessProfile()">↺ Reset Saved Details</button>
         <div id="saveStatus" class="save-status">Auto-saves business name and account details on this device.</div>
+        <div id="receiptStatus" class="save-status">Receipt number is generated sequentially on this device.</div>
+    </div>
+
+    <div class="mobile-action-bar no-print-area">
+        <button class="btn" onclick="printReceipt()">🖨️ Print / Save PDF</button>
+        <button class="btn secondary-btn" onclick="createNewReceipt()">＋ New Receipt</button>
     </div>
 
     <div class="receipt-container">
@@ -191,13 +267,13 @@
                 </div>
             </div>
             
-            <div class="TOTAL-box">
-                <div>Sales: <input type="number" id="TOTALSales" readonly></div>
+            <div class="total-box">
+                <div>Total Sales: <input type="number" id="totalSales" readonly></div>
                 <div>Less: Down: <input type="number" id="downpayment" oninput="calculate()"></div>
                 <div>Discounts: <input type="number" id="discounts" oninput="calculate()"></div>
                 <div style="border-top: 2px solid #000; padding-top: 5px; margin-top: 5px;">
-                    <strong>TOTAL:</strong>
-                    <strong><input type="number" id="TOTAL" readonly></strong>
+                    <strong>BALANCE:</strong>
+                    <strong><input type="number" id="balance" readonly></strong>
                 </div>
             </div>
         </div>
@@ -217,6 +293,7 @@
 
     <script>
         const PROFILE_KEY = "acknowledgementReceiptBusinessProfile_v1";
+        const RECEIPT_COUNTER_KEY = "acknowledgementReceiptCounter_v1";
 
         const profileFields = [
             "businessName",
@@ -229,19 +306,120 @@
             "contactInfo"
         ];
 
+        let currentReceiptNumber = "";
+        let currentReceiptMarkedUsed = false;
+
         function initReceipt() {
-            generateOR();
             loadBusinessProfile();
             setupAutoSave();
+            generateOR();
             calculate();
         }
 
+        function getReceiptCounter() {
+            try {
+                return JSON.parse(localStorage.getItem(RECEIPT_COUNTER_KEY)) || {};
+            } catch (error) {
+                return {};
+            }
+        }
+
+        function getNextReceiptNumber() {
+            const year = new Date().getFullYear();
+            const saved = getReceiptCounter();
+
+            // Starts at 0001 each year. Existing users can continue from this device's saved sequence.
+            const lastNumber = Number(saved[year] || 0);
+            const nextNumber = lastNumber + 1;
+
+            return {
+                year,
+                sequence: nextNumber,
+                formatted: `${year}-${String(nextNumber).padStart(4, "0")}`
+            };
+        }
+
         function generateOR() {
-            let randomNo = Math.floor(1000 + Math.random() * 9000);
-            let year = new Date().getFullYear();
-            document.getElementById('orNumber').value = year + "-" + randomNo;
-            let today = new Date().toLocaleDateString('en-US');
-            document.getElementById('currentDate').value = today;
+            const next = getNextReceiptNumber();
+            currentReceiptNumber = next.formatted;
+            currentReceiptMarkedUsed = false;
+
+            document.getElementById('orNumber').value = currentReceiptNumber;
+            document.getElementById('currentDate').value = new Date().toLocaleDateString('en-US');
+
+            showReceiptStatus(`Ready: Receipt No. ${currentReceiptNumber}`);
+        }
+
+        function markReceiptAsUsed() {
+            if (currentReceiptMarkedUsed) {
+                return;
+            }
+
+            const numberInput = document.getElementById('orNumber');
+            const number = numberInput.value.trim();
+
+            // Only advances the automatic sequence for its generated receipt number.
+            if (number === currentReceiptNumber) {
+                const next = getNextReceiptNumber();
+                const saved = getReceiptCounter();
+                saved[next.year] = next.sequence;
+                localStorage.setItem(RECEIPT_COUNTER_KEY, JSON.stringify(saved));
+            }
+
+            currentReceiptMarkedUsed = true;
+            showReceiptStatus(`Marked as used: ${number || currentReceiptNumber}`);
+        }
+
+        function printReceipt() {
+            markReceiptAsUsed();
+
+            // Direct call is important for mobile browser gesture permissions.
+            try {
+                window.focus();
+                window.print();
+            } catch (error) {
+                showReceiptStatus("Print is blocked in this in-app browser. Tap ⋯ then choose Open in Browser.");
+            }
+
+            // Messenger/Facebook in-app browsers sometimes ignore window.print().
+            setTimeout(() => {
+                showReceiptStatus("If the print sheet did not open, tap ⋯ then choose Open in Browser, then tap Print / Save PDF again.");
+            }, 900);
+        }
+
+        function createNewReceipt() {
+            const hasAnyEntry = [...document.querySelectorAll('#receipt-items input, #downpayment, #discounts')]
+                .some(field => String(field.value || "").trim() !== "");
+
+            if (hasAnyEntry && !currentReceiptMarkedUsed) {
+                const proceed = confirm(
+                    "Create a new receipt? The current receipt number will be marked as used so it will not repeat."
+                );
+                if (!proceed) return;
+                markReceiptAsUsed();
+            }
+
+            clearReceiptForm();
+            generateOR();
+        }
+
+        function clearReceiptForm() {
+            document.querySelectorAll('#receipt-items input').forEach(field => field.value = "");
+            document.getElementById('downpayment').value = "";
+            document.getElementById('discounts').value = "";
+            document.getElementById('totalSales').value = "";
+            document.getElementById('balance').value = "";
+
+            const soldTo = document.querySelector('.gray-box input[type="text"]');
+            const refNo = document.querySelector('.payment-box input[type="text"]');
+
+            if (soldTo) soldTo.value = "";
+            if (refNo) refNo.value = "";
+
+            document.querySelectorAll('.row input[type="checkbox"], .payment-box input[type="checkbox"]').forEach((box, index) => {
+                // Keep GCash checked by default, clear the rest.
+                box.checked = box.closest('.payment-box') ? index === 4 : false;
+            });
         }
 
         function getBusinessProfile() {
@@ -318,22 +496,27 @@
             }, 2500);
         }
 
+        function showReceiptStatus(message) {
+            const status = document.getElementById("receiptStatus");
+            if (status) status.textContent = message;
+        }
+
         function calculate() {
             let rows = document.querySelectorAll('#receipt-items tr');
-            let TOTALSales = 0;
+            let totalSales = 0;
             rows.forEach(row => {
                 let qty = parseFloat(row.querySelector('.qty').value) || 0;
                 let price = parseFloat(row.querySelector('.price').value) || 0;
                 let amountField = row.querySelector('.amount');
                 let amount = qty * price;
                 amountField.value = amount > 0 ? amount.toFixed(2) : "";
-                TOTALSales += amount;
+                totalSales += amount;
             });
-            document.getElementById('TOTALSales').value = TOTALSales.toFixed(2);
+            document.getElementById('totalSales').value = totalSales.toFixed(2);
             let downpayment = parseFloat(document.getElementById('downpayment').value) || 0;
             let discounts = parseFloat(document.getElementById('discounts').value) || 0;
-            let TOTAL = TOTALSales - downpayment - discounts;
-            document.getElementById('TOTAL').value = TOTAL.toFixed(2);
+            let balance = totalSales - downpayment - discounts;
+            document.getElementById('balance').value = balance.toFixed(2);
         }
     </script>
 
