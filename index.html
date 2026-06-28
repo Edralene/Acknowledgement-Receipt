@@ -94,6 +94,60 @@
         .btn { padding: 12px 18px; border: none; cursor: pointer; border-radius: 8px; font-weight: bold; background: #bca37d; color: white; width: min(100%, 260px); touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
         .mobile-action-bar { display: none; }
         .desktop-action-panel { margin-bottom: 20px; text-align: center; display: flex; flex-direction: column; align-items: center; gap: 8px; }
+        .image-preview-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            z-index: 2147483647;
+            padding: 14px;
+            background: rgba(20, 30, 33, .62);
+            overflow-y: auto;
+        }
+        .image-preview-overlay.show { display: block; }
+        .image-preview-sheet {
+            width: min(760px, 100%);
+            margin: 0 auto;
+            padding: 14px;
+            border-radius: 16px;
+            background: #fff;
+            box-shadow: 0 22px 60px rgba(0,0,0,.28);
+        }
+        .image-preview-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+        }
+        .image-preview-head strong { font-size: 16px; }
+        .preview-close {
+            width: 36px;
+            height: 36px;
+            border: 0;
+            border-radius: 10px;
+            background: #f1f1f1;
+            font-size: 22px;
+            cursor: pointer;
+        }
+        .image-preview-sheet p {
+            margin: 10px 0;
+            color: #555;
+            line-height: 1.45;
+            font-size: 13px;
+        }
+        .image-preview-sheet img {
+            display: block;
+            width: 100%;
+            height: auto;
+            border: 1px solid #ddd;
+            background: #fff;
+        }
+        .image-preview-actions {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin-top: 12px;
+        }
+        .image-preview-actions .btn { width: 100%; }
         .secondary-btn { background: #5f6f65; }
         .light-btn { background: white; color: #5f6f65; border: 1px solid #cfcfcf; }
         .save-status { font-size: 12px; color: #666; max-width: 320px; line-height: 1.4; }
@@ -183,20 +237,25 @@
 
             /* Gives space below the fixed action dock so the receipt never sits under it. */
             .receipt-container { margin-top: 126px; }
+            .image-preview-overlay { padding: 8px; }
+            .image-preview-sheet { padding: 12px; border-radius: 14px; }
+            .image-preview-actions { grid-template-columns: 1fr; }
+            .image-preview-actions .btn { min-height: 46px; }
         }
 
         @media print {
-            .no-print-area, .mobile-action-bar, .desktop-action-panel { display: none !important; }
+            .no-print-area, .mobile-action-bar, .desktop-action-panel, .image-preview-overlay { display: none !important; }
             body { background: white; padding: 0; }
             .receipt-container { box-shadow: none; border: none; width: 100%; max-width: none; padding: 10px; overflow: visible; }
             input::placeholder { color: transparent; }
         }
     </style>
+  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
 </head>
 <body onload="initReceipt()">
 
     <div class="desktop-action-panel no-print-area">
-        <button type="button" class="btn" onclick="printReceiptSafe()">🖨️ Print / Save PDF</button>
+        <button type="button" class="btn" onclick="saveReceiptImage()">🖼️ Save Image</button>
         <button type="button" class="btn secondary-btn" onclick="saveCurrentReceiptNumber()">💾 Save Receipt No.</button>
         <button type="button" class="btn secondary-btn" onclick="createNewReceipt()">＋ New Receipt</button>
         <button type="button" class="btn secondary-btn" onclick="saveBusinessProfile()">💾 Save Business Details</button>
@@ -206,9 +265,24 @@
     </div>
 
     <div class="mobile-action-bar" id="mobileActionBar">
-        <button type="button" class="btn" onclick="printReceiptSafe()">🖨️ Print / Save PDF</button>
+        <button type="button" class="btn" onclick="saveReceiptImage()">🖼️ Save Image</button>
         <button type="button" class="btn secondary-btn" onclick="saveCurrentReceiptNumber()">💾 Save No.</button>
         <button type="button" class="btn secondary-btn" onclick="createNewReceipt()">＋ New</button>
+    </div>
+
+    <div class="image-preview-overlay" id="imagePreviewOverlay" aria-hidden="true">
+        <div class="image-preview-sheet">
+            <div class="image-preview-head">
+                <strong>Receipt image ready</strong>
+                <button type="button" class="preview-close" onclick="closeImagePreview()" aria-label="Close">×</button>
+            </div>
+            <p>Tap <b>Share / Save Image</b>. Sa iPhone, piliin ang <b>Save Image</b> sa share sheet. Kung walang lumabas, long press the image then choose Save to Photos.</p>
+            <img id="receiptImagePreview" alt="Generated acknowledgement receipt">
+            <div class="image-preview-actions">
+                <button type="button" class="btn" onclick="shareGeneratedImage()">↗ Share / Save Image</button>
+                <button type="button" class="btn light-btn" onclick="downloadGeneratedImage()">⇩ Download PNG</button>
+            </div>
+        </div>
     </div>
 
     <div class="receipt-container">
@@ -387,16 +461,111 @@
             showReceiptStatus(`Saved: ${number || currentReceiptNumber}. You can now create a new receipt.`);
         }
 
-        function printReceiptSafe() {
-            // Keep printing separate from receipt-number saving.
-            showReceiptStatus("Opening print options...");
+        let generatedReceiptBlob = null;
+        let generatedReceiptUrl = "";
+
+        function hideActionPanelsForCapture(hide = true) {
+            document.querySelectorAll(".no-print-area, .mobile-action-bar, .desktop-action-panel")
+                .forEach(el => el.style.visibility = hide ? "hidden" : "");
+        }
+
+        async function saveReceiptImage() {
+            const receipt = document.querySelector(".receipt-container");
+
+            if (!receipt) {
+                showReceiptStatus("Receipt area was not found.");
+                return;
+            }
+
+            if (typeof html2canvas !== "function") {
+                showReceiptStatus("Image tool is still loading. Please try again in a few seconds.");
+                return;
+            }
+
+            showReceiptStatus("Creating receipt image...");
+            hideActionPanelsForCapture(true);
 
             try {
-                window.focus();
-                window.print();
+                // Let the browser finish hiding the action dock before capturing.
+                await new Promise(resolve => setTimeout(resolve, 80));
+
+                const canvas = await html2canvas(receipt, {
+                    backgroundColor: "#ffffff",
+                    scale: 2,
+                    useCORS: true,
+                    logging: false,
+                    scrollX: 0,
+                    scrollY: -window.scrollY,
+                    windowWidth: document.documentElement.clientWidth
+                });
+
+                const blob = await new Promise(resolve => canvas.toBlob(resolve, "image/png", 1));
+                if (!blob) throw new Error("Could not create image.");
+
+                generatedReceiptBlob = blob;
+
+                if (generatedReceiptUrl) URL.revokeObjectURL(generatedReceiptUrl);
+                generatedReceiptUrl = URL.createObjectURL(blob);
+
+                document.getElementById("receiptImagePreview").src = generatedReceiptUrl;
+                document.getElementById("imagePreviewOverlay").classList.add("show");
+                document.getElementById("imagePreviewOverlay").setAttribute("aria-hidden", "false");
+
+                showReceiptStatus("Receipt image ready. Tap Share / Save Image.");
             } catch (error) {
-                showReceiptStatus("This in-app browser blocked printing. Tap ⋯ then choose Open in Browser.");
+                showReceiptStatus("Could not create image. Open the page in Safari/Chrome, then try again.");
+            } finally {
+                hideActionPanelsForCapture(false);
             }
+        }
+
+        async function shareGeneratedImage() {
+            if (!generatedReceiptBlob) {
+                showReceiptStatus("Create the image first.");
+                return;
+            }
+
+            const number = (document.getElementById("orNumber").value || "receipt").replace(/[^\w-]/g, "-");
+            const file = new File([generatedReceiptBlob], `${number}.png`, { type: "image/png" });
+
+            try {
+                if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                    await navigator.share({
+                        title: "Acknowledgement Receipt",
+                        text: "Save this receipt image.",
+                        files: [file]
+                    });
+                    showReceiptStatus("Use the share sheet to Save Image.");
+                    return;
+                }
+            } catch (error) {
+                // User may cancel the share sheet. Keep the preview available.
+                return;
+            }
+
+            downloadGeneratedImage();
+        }
+
+        function downloadGeneratedImage() {
+            if (!generatedReceiptBlob || !generatedReceiptUrl) {
+                showReceiptStatus("Create the image first.");
+                return;
+            }
+
+            const number = (document.getElementById("orNumber").value || "receipt").replace(/[^\w-]/g, "-");
+            const link = document.createElement("a");
+            link.href = generatedReceiptUrl;
+            link.download = `${number}.png`;
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+
+            showReceiptStatus("Image download started. If blocked, long press the preview image to save it.");
+        }
+
+        function closeImagePreview() {
+            document.getElementById("imagePreviewOverlay").classList.remove("show");
+            document.getElementById("imagePreviewOverlay").setAttribute("aria-hidden", "true");
         }
 
         function createNewReceipt() {
